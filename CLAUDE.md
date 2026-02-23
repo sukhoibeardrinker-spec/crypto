@@ -15,7 +15,7 @@ source .venv/Scripts/activate   # Windows Git Bash
 .venv\Scripts\activate          # Windows CMD/PowerShell
 
 # Run the FastAPI dev server
-uvicorn crypto.main:app --reload
+uvicorn crservice.main:app --reload
 ```
 
 The API will be available at `http://127.0.0.1:8000`. FastAPI auto-generates interactive docs at `/docs`.
@@ -24,10 +24,10 @@ The API will be available at `http://127.0.0.1:8000`. FastAPI auto-generates int
 
 ```bash
 # Fetch RSI data for X:HYPEUSD from Massive API
-python crypto/cr.py
+python crservice/cr.py
 
 # Print current Unix timestamp (debug utility)
-python crypto/otladka.py
+python crservice/otladka.py
 ```
 
 ## Project Structure

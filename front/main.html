@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RSI Monitor</title>
+  <style>
+    body { font-family: monospace; background: #111; color: #eee;
+           display: flex; flex-direction: column; align-items: center;
+           padding: 40px 20px; margin: 0; }
+    h1 { font-size: 1rem; color: #555; letter-spacing: 3px; margin: 0 0 32px; }
+    .tables { display: flex; gap: 48px; flex-wrap: wrap; justify-content: center; }
+    .tbl-block h2 { font-size: 0.85rem; color: #666; letter-spacing: 2px;
+                    margin: 0 0 8px; text-align: center; }
+    table { border-collapse: collapse; font-size: 0.78rem; }
+    th { color: #444; padding: 4px 12px; border-bottom: 1px solid #2a2a2a; text-align: right; }
+    th:first-child { text-align: left; }
+    td { padding: 3px 12px; text-align: right; color: #999; }
+    td:first-child { text-align: left; color: #555; }
+    tr:last-child td { color: #eee; font-weight: bold; }
+    .rsi-ob { color: #ff4444 !important; }
+    .rsi-os { color: #44cc44 !important; }
+    .updated { font-size: 0.7rem; color: #333; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>RSI MONITOR</h1>
+
+  <div class="tables">
+    <div class="tbl-block">
+      <h2>HYPEUSDT — RSI-14</h2>
+      <table>
+        <thead><tr><th>Timestamp</th><th>Price</th><th>RSI-14</th></tr></thead>
+        <tbody id="tbl-HYPEUSDT"></tbody>
+      </table>
+    </div>
+    <div class="tbl-block">
+      <h2>BTCUSD — RSI-14</h2>
+      <table>
+        <thead><tr><th>Timestamp</th><th>Price</th><th>RSI-14</th></tr></thead>
+        <tbody id="tbl-BTCUSD"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="updated" id="tbl-updated">—</div>
+
+  <script>
+    function renderTable(ticker, rows) {
+      const tbody = document.getElementById('tbl-' + ticker);
+      if (!tbody || !rows.length) return;
+
+      const sorted = [...rows.map(r => r.rsi)].sort((a, b) => a - b);
+      const minSet = new Set(sorted.slice(0, 5));
+      const maxSet = new Set(sorted.slice(-5));
+
+      tbody.innerHTML = rows.map(r => {
+        let cls = '';
+        if (maxSet.has(r.rsi)) cls = 'rsi-ob';
+        else if (minSet.has(r.rsi)) cls = 'rsi-os';
+        return `<tr>
+          <td>${r.time}</td>
+          <td>${r.price.toFixed(2)}</td>
+          <td class="${cls}">${r.rsi.toFixed(2)}</td>
+        </tr>`;
+      }).join('');
+    }
+    async function loadTable() {
+      try {
+        const res = await fetch('/api/table');
+        const json = await res.json();
+        json.tickers.forEach(t => renderTable(t, json.data[t] || []));
+        document.getElementById('tbl-updated').textContent = 'Updated: ' + json.updated_at;
+      } catch(e) { console.error(e); }
+    }
+    loadTable();
+    setInterval(loadTable, 60000);
+  </script>
+</body>
+</html>
