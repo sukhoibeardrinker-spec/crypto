@@ -43,7 +43,6 @@ crypto/
 ## Architecture
 
 - **`crypto/main.py`** — FastAPI application. All endpoints are `async def`. Currently defines `/` and `/hello/{name}`.
-- **`crypto/cr.py`** — Standalone script using `massive.RESTClient` to query technical indicators (RSI) for crypto pairs. The API key is currently hardcoded here — it should be moved to an environment variable before any production use.
 - No database, no authentication layer, no test framework currently configured.
 
 ## Key Dependencies
@@ -53,10 +52,9 @@ crypto/
 | `fastapi` 0.131.0 | Web framework |
 | `starlette` 0.52.1 | ASGI foundation (used by FastAPI) |
 | `pydantic` 2.x | Request/response validation |
-| `massive` 2.2.0 | Massive (Polygon.io) REST API client for market data |
 | `uvicorn` | ASGI server (must be installed separately if missing) |
 
 ## Notes
 
-- The Massive API key in `cr.py:5` is exposed in source — use `os.environ` or a `.env` file instead.
+- pybit api client for market information
 - No `requirements.txt` or `pyproject.toml` exists yet; dependencies are only tracked by the `.venv`.

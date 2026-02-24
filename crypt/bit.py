@@ -1,17 +1,18 @@
 
+import bisect
+
 from pybit.unified_trading import HTTP
 
-key = '799hm9EMCGgvjaFOIn'
-secret_key = 'KASq8mgoSFnBPXHLd4ZfWV8vPXzBxweDim6y'
+from crypt.config import BYBIT_API_KEY, BYBIT_API_SECRET, ShortCriteria
 
 session = HTTP(
     testnet=True,
-    api_key=key,
-    api_secret=secret_key,
+    api_key=BYBIT_API_KEY,
+    api_secret=BYBIT_API_SECRET,
 )
 
 RSI_PERIOD = 14
-SYMBOL = "BTCUSDT"
+
 
 
 import datetime
@@ -49,7 +50,7 @@ def calculate_rsi_series(prices: list, period: int = 14) -> list:
     return results
 
 
-def fetch_rsi_data(symbol: str, interval: int = 15, period: int = RSI_PERIOD, limit: int = 110):
+def fetch_rsi_data(symbol: str, interval: int = 15, period: int = RSI_PERIOD, limit: int = 200):
     res = session.get_index_price_kline(
         category="linear", symbol=symbol, interval=interval, limit=limit,
     )
@@ -70,14 +71,103 @@ def fetch_rsi_data(symbol: str, interval: int = 15, period: int = RSI_PERIOD, li
     return records
 
 
-if __name__ == "__main__":
-    records = fetch_rsi_data(SYMBOL)
+def check_short_signal(row: dict, criteria: ShortCriteria) -> bool:
+    """Return True when all RSI thresholds (from criteria) are breached
+    and price strictly exceeds the running intraday high (all prior candles of the same day).
 
-    print(f"{'Timestamp':<20} {'Price':>12} {'RSI-14':>8}")
-    print("-" * 44)
-    for r in records:
-        print(f"{r['time'].strftime('%Y-%m-%d %H:%M'):<20} {r['price']:>12.2f} {r['rsi']:>8.2f}")
+    Both prices are rounded to criteria.price_precision decimal places before comparison
+    so that values which look identical in the table do not produce false signals.
+    """
+    day_high = row.get("day_high_so_far")
+    if day_high is None:
+        return False
 
-    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-    print(f"Latest RSI-{RSI_PERIOD}: {records[-1]['rsi']:.2f}")
+    p = criteria.price_precision
+    price    = round(row["price"], p)
+    day_high = round(day_high,     p)
+
+    return (
+        price > day_high and
+        row.get("rsi_15m") is not None and row["rsi_15m"] > criteria.rsi_15m and
+        row.get("rsi_1h")  is not None and row["rsi_1h"]  > criteria.rsi_1h  and
+        row.get("rsi_4h")  is not None and row["rsi_4h"]  > criteria.rsi_4h  and
+        row.get("rsi_1d")  is not None and row["rsi_1d"]  > criteria.rsi_1d
+    )
+
+
+def fetch_rsi_multi(symbol: str, criteria: ShortCriteria | None = None, period: int = RSI_PERIOD, limit: int = 110):
+    """Fetch RSI for 15m, 1H, 4H, 1D intervals, all aligned to 15m candles.
+
+    Returns a list (oldest → newest) of dicts:
+        time, price, rsi_15m, rsi_1h, rsi_4h, rsi_1d, day_high_so_far, is_short
+    Higher-TF fields can be None if no matching candle is found.
+    """
+    if criteria is None:
+        criteria = ShortCriteria()
+
+    def _fetch_candles(interval):
+        """Return candles sorted oldest → newest."""
+        res = session.get_index_price_kline(
+            category="linear", symbol=symbol, interval=interval, limit=limit,
+        )
+        return list(reversed(res["result"]["list"]))
+
+    def _rsi_map(candles):
+        """Return {open_ts_ms: rsi} for candles that have enough history."""
+        closes = [float(c[4]) for c in candles]
+        rsi_values = calculate_rsi_series(closes, period)
+        return {int(candles[period + i][0]): rsi for i, rsi in enumerate(rsi_values)}
+
+    def _make_lookup(rsi_map):
+        """Return ts_ms → RSI of the candle that was active at that moment."""
+        sorted_keys = sorted(rsi_map.keys())
+
+        def lookup(ts_ms):
+            idx = bisect.bisect_right(sorted_keys, ts_ms) - 1
+            return rsi_map[sorted_keys[idx]] if idx >= 0 else None
+
+        return lookup
+
+    # --- fetch raw candles for every timeframe ---
+    candles_15 = _fetch_candles(15)
+    candles_1h = _fetch_candles(60)
+    candles_4h = _fetch_candles(240)
+    candles_1d = _fetch_candles("D")
+
+    # --- RSI lookups ---
+    lookup_1h = _make_lookup(_rsi_map(candles_1h))
+    lookup_4h = _make_lookup(_rsi_map(candles_4h))
+    lookup_1d = _make_lookup(_rsi_map(candles_1d))
+
+    # --- base 15m RSI ---
+    closes_15 = [float(c[4]) for c in candles_15]
+    rsi_15 = calculate_rsi_series(closes_15, period)
+
+    # First pass: build records without day_high_so_far
+    result = []
+    for i, rsi in enumerate(rsi_15):
+        ts_ms = int(candles_15[period + i][0])
+        result.append({
+            "time":    datetime.datetime.fromtimestamp(ts_ms / 1000),
+            "price":   closes_15[period + i],
+            "rsi_15m": rsi,
+            "rsi_1h":  lookup_1h(ts_ms),
+            "rsi_4h":  lookup_4h(ts_ms),
+            "rsi_1d":  lookup_1d(ts_ms),
+        })
+
+    # Second pass: compute running intraday high and is_short
+    # Records are oldest→newest; day_running_max tracks max price seen so far per calendar day.
+    day_running_max: dict = {}
+    for rec in result:
+        d = rec["time"].date()
+        rec["day_high_so_far"] = day_running_max.get(d)   # None for first candle of the day
+        prev_max = day_running_max.get(d)
+        day_running_max[d] = rec["price"] if prev_max is None else max(prev_max, rec["price"])
+        rec["is_short"] = check_short_signal(rec, criteria)
+
+    return result
+
+
+
 
