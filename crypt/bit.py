@@ -1,21 +1,18 @@
-
 import bisect
+import datetime
+import logging
 
 from pybit.unified_trading import HTTP
 
-from crypt.config import BYBIT_API_KEY, BYBIT_API_SECRET, ShortCriteria
+from crypt.config import BYBIT_API_KEY, BYBIT_API_SECRET, ShortCriteria, LongCriteria
 
 session = HTTP(
-    testnet=True,
+    testnet=False,
     api_key=BYBIT_API_KEY,
     api_secret=BYBIT_API_SECRET,
 )
 
 RSI_PERIOD = 14
-
-
-
-import datetime
 
 
 def calculate_rsi_series(prices: list, period: int = 14) -> list:
@@ -50,7 +47,7 @@ def calculate_rsi_series(prices: list, period: int = 14) -> list:
     return results
 
 
-def fetch_rsi_data(symbol: str, interval: int = 15, period: int = RSI_PERIOD, limit: int = 200):
+def fetch_rsi_data(symbol: str, interval: int = 1, period: int = RSI_PERIOD, limit: int = 1000):
     res = session.get_index_price_kline(
         category="linear", symbol=symbol, interval=interval, limit=limit,
     )
@@ -67,27 +64,24 @@ def fetch_rsi_data(symbol: str, interval: int = 15, period: int = RSI_PERIOD, li
         for i, rsi in enumerate(rsi_values)
     ]
 
-
     return records
 
 
 def check_short_signal(row: dict, criteria: ShortCriteria) -> bool:
-    """Return True when all RSI thresholds (from criteria) are breached
-    and price strictly exceeds the running intraday high (all prior candles of the same day).
+    """Return True when all RSI thresholds are breached.
 
-    Both prices are rounded to criteria.price_precision decimal places before comparison
-    so that values which look identical in the table do not produce false signals.
+    If criteria.use_day_high is True (default), also requires price to strictly
+    exceed the running intraday high of all prior candles of the same day.
     """
-    day_high = row.get("day_high_so_far")
-    if day_high is None:
-        return False
-
-    p = criteria.price_precision
-    price    = round(row["price"], p)
-    day_high = round(day_high,     p)
+    if criteria.use_day_high:
+        day_high = row.get("day_high_so_far")
+        if day_high is None:
+            return False
+        p = criteria.price_precision
+        if not (round(row["price"], p) > round(day_high, p)):
+            return False
 
     return (
-        price > day_high and
         row.get("rsi_15m") is not None and row["rsi_15m"] > criteria.rsi_15m and
         row.get("rsi_1h")  is not None and row["rsi_1h"]  > criteria.rsi_1h  and
         row.get("rsi_4h")  is not None and row["rsi_4h"]  > criteria.rsi_4h  and
@@ -95,20 +89,53 @@ def check_short_signal(row: dict, criteria: ShortCriteria) -> bool:
     )
 
 
-def fetch_rsi_multi(symbol: str, criteria: ShortCriteria | None = None, period: int = RSI_PERIOD, limit: int = 110):
-    """Fetch RSI for 15m, 1H, 4H, 1D intervals, all aligned to 15m candles.
+def check_long_signal(row: dict, criteria: LongCriteria) -> bool:
+    """Return True when all RSI values are below their thresholds (oversold).
 
+    If criteria.use_day_low is True (default), also requires price to be strictly
+    below the running intraday low of all prior candles of the same day.
+    """
+    if criteria.use_day_low:
+        day_low = row.get("day_low_so_far")
+        if day_low is None:
+            return False
+        p = criteria.price_precision
+        if not (round(row["price"], p) < round(day_low, p)):
+            return False
+
+    return (
+        row.get("rsi_15m") is not None and row["rsi_15m"] < criteria.rsi_15m and
+        row.get("rsi_1h")  is not None and row["rsi_1h"]  < criteria.rsi_1h  and
+        row.get("rsi_4h")  is not None and row["rsi_4h"]  < criteria.rsi_4h  and
+        row.get("rsi_1d")  is not None and row["rsi_1d"]  < criteria.rsi_1d
+    )
+
+
+def fetch_rsi_multi(
+    symbol: str,
+    criteria: ShortCriteria | None = None,
+    long_criteria: LongCriteria | None = None,
+    base_interval: int = 15,
+    base_limit: int = 110,
+    period: int = RSI_PERIOD,
+):
+    """Fetch RSI for base + 1H, 4H, 1D intervals, all aligned to base candles.
+
+    base_interval — candle size in minutes for the base timeframe (1 or 15).
+    base_limit    — how many base candles to fetch.
     Returns a list (oldest → newest) of dicts:
-        time, price, rsi_15m, rsi_1h, rsi_4h, rsi_1d, day_high_so_far, is_short
+        time, price, rsi_15m, rsi_1h, rsi_4h, rsi_1d, day_high_so_far, is_short, ...
     Higher-TF fields can be None if no matching candle is found.
     """
     if criteria is None:
         criteria = ShortCriteria()
 
-    def _fetch_candles(interval):
+    HT_LIMIT = 110  # candle count for higher timeframes (1H / 4H / 1D)
+
+    def _fetch_candles(interval, lim=HT_LIMIT):
         """Return candles sorted oldest → newest."""
         res = session.get_index_price_kline(
-            category="linear", symbol=symbol, interval=interval, limit=limit,
+            category="linear", symbol=symbol, interval=interval, limit=lim,
         )
         return list(reversed(res["result"]["list"]))
 
@@ -128,46 +155,77 @@ def fetch_rsi_multi(symbol: str, criteria: ShortCriteria | None = None, period: 
 
         return lookup
 
-    # --- fetch raw candles for every timeframe ---
-    candles_15 = _fetch_candles(15)
-    candles_1h = _fetch_candles(60)
-    candles_4h = _fetch_candles(240)
-    candles_1d = _fetch_candles("D")
+    # --- fetch raw candles ---
+    candles_base = _fetch_candles(base_interval, lim=base_limit)
+    candles_1h   = _fetch_candles(60)
+    candles_4h   = _fetch_candles(240)
+    candles_1d   = _fetch_candles("D")
 
-    # --- RSI lookups ---
+    # --- RSI lookups for higher timeframes ---
     lookup_1h = _make_lookup(_rsi_map(candles_1h))
     lookup_4h = _make_lookup(_rsi_map(candles_4h))
     lookup_1d = _make_lookup(_rsi_map(candles_1d))
 
-    # --- base 15m RSI ---
-    closes_15 = [float(c[4]) for c in candles_15]
-    rsi_15 = calculate_rsi_series(closes_15, period)
+    # --- base RSI ---
+    closes_base = [float(c[4]) for c in candles_base]
+    rsi_base    = calculate_rsi_series(closes_base, period)
 
     # First pass: build records without day_high_so_far
     result = []
-    for i, rsi in enumerate(rsi_15):
-        ts_ms = int(candles_15[period + i][0])
+    for i, rsi in enumerate(rsi_base):
+        ts_ms = int(candles_base[period + i][0])
         result.append({
             "time":    datetime.datetime.fromtimestamp(ts_ms / 1000),
-            "price":   closes_15[period + i],
-            "rsi_15m": rsi,
+            "price":   closes_base[period + i],
+            "rsi_15m": rsi,            # key stays rsi_15m regardless of base interval
             "rsi_1h":  lookup_1h(ts_ms),
             "rsi_4h":  lookup_4h(ts_ms),
             "rsi_1d":  lookup_1d(ts_ms),
         })
 
-    # Second pass: compute running intraday high and is_short
-    # Records are oldest→newest; day_running_max tracks max price seen so far per calendar day.
+    # Second pass: running intraday high/low and signals (oldest → newest)
     day_running_max: dict = {}
+    day_running_min: dict = {}
     for rec in result:
         d = rec["time"].date()
-        rec["day_high_so_far"] = day_running_max.get(d)   # None for first candle of the day
+        rec["day_high_so_far"] = day_running_max.get(d)
+        rec["day_low_so_far"]  = day_running_min.get(d)
         prev_max = day_running_max.get(d)
+        prev_min = day_running_min.get(d)
         day_running_max[d] = rec["price"] if prev_max is None else max(prev_max, rec["price"])
+        day_running_min[d] = rec["price"] if prev_min is None else min(prev_min, rec["price"])
         rec["is_short"] = check_short_signal(rec, criteria)
+        rec["is_long"]  = check_long_signal(rec, long_criteria) if long_criteria else False
+
+    # Third pass: profit metrics
+    current_price = result[-1]["price"] if result else None
+
+    for i, rec in enumerate(result):
+        signal_price = rec["price"]
+        prices_after = [r["price"] for r in result[i + 1:]]
+
+        # SHORT: profit when price falls
+        if rec["is_short"] and current_price is not None:
+            rec["potential_profit_pct"] = round(
+                (signal_price - min(prices_after)) / signal_price * 100, 2
+            ) if prices_after else None
+            rec["current_profit_pct"] = round(
+                (signal_price - current_price) / signal_price * 100, 2
+            )
+        else:
+            rec["potential_profit_pct"] = None
+            rec["current_profit_pct"]   = None
+
+        # LONG: profit when price rises
+        if rec["is_long"] and current_price is not None:
+            rec["long_potential_profit_pct"] = round(
+                (max(prices_after) - signal_price) / signal_price * 100, 2
+            ) if prices_after else None
+            rec["long_current_profit_pct"] = round(
+                (current_price - signal_price) / signal_price * 100, 2
+            )
+        else:
+            rec["long_potential_profit_pct"] = None
+            rec["long_current_profit_pct"]   = None
 
     return result
-
-
-
-

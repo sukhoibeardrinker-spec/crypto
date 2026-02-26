@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:bybit-exchange.github.io)",
+      "Bash(curl:*)",
+      "Bash(python:*)",
+      "Bash(sleep 5 && curl -s http://localhost:8000/api/table | python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('OK, tickers:', d['tickers']\\)\" 2>&1)"
+    ]
+  }
+}

@@ -14,33 +14,51 @@
       padding: 40px 20px;
       margin: 0;
     }
+
+    /* Tab navigation */
+    .tab-nav { display: flex; gap: 2px; margin-bottom: 28px; }
+    .tab-nav-btn {
+      background: #1a1a1a; border: 1px solid #222; color: #444;
+      padding: 6px 24px; font-family: monospace; font-size: 0.8rem;
+      letter-spacing: 2px; cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .tab-nav-btn:hover { border-color: #333; color: #888; }
+    .tab-nav-btn.active { border-color: #555; color: #ccc; background: #1e1e1e; }
+
     h1 { font-size: 1rem; color: #555; letter-spacing: 3px; margin: 0 0 28px; }
 
     /* Ticker selector */
-    .selector { display: flex; gap: 12px; margin-bottom: 28px; flex-wrap: wrap; justify-content: center; }
+    .selector { display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; justify-content: center; }
     .ticker-btn {
-      background: #1a1a1a;
-      border: 1px solid #2a2a2a;
-      color: #555;
-      padding: 6px 20px;
-      font-family: monospace;
-      font-size: 0.82rem;
-      letter-spacing: 2px;
-      cursor: pointer;
+      background: #1a1a1a; border: 1px solid #2a2a2a; color: #555;
+      padding: 6px 20px; font-family: monospace; font-size: 0.82rem;
+      letter-spacing: 2px; cursor: pointer;
       transition: border-color 0.15s, color 0.15s, background 0.15s;
     }
     .ticker-btn:hover { border-color: #444; color: #aaa; }
     .ticker-btn.active { border-color: #666; color: #eee; background: #222; }
 
+    /* Interval selector */
+    .interval-selector { display: flex; gap: 8px; margin-bottom: 24px; }
+    .interval-btn {
+      background: #1a1a1a; border: 1px solid #2a2a2a; color: #555;
+      padding: 4px 14px; font-family: monospace; font-size: 0.75rem;
+      letter-spacing: 1px; cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .interval-btn:hover { border-color: #444; color: #aaa; }
+    .interval-btn.active { border-color: #555; color: #ccc; background: #1e1e1e; }
+
+    /* Layout */
+    .content-wrap { display: flex; gap: 32px; align-items: flex-start; }
+    .ticker-title { font-size: 0.82rem; color: #555; letter-spacing: 2px; margin-bottom: 12px; text-align: center; }
+
     /* Table */
-    .ticker-title { font-size: 0.82rem; color: #555; letter-spacing: 2px; margin-bottom: 12px; }
     table { border-collapse: collapse; font-size: 0.78rem; }
     th {
-      color: #444;
-      padding: 4px 14px;
-      border-bottom: 1px solid #2a2a2a;
-      text-align: right;
-      white-space: nowrap;
+      color: #444; padding: 4px 14px; border-bottom: 1px solid #2a2a2a;
+      text-align: right; white-space: nowrap;
     }
     th:first-child { text-align: left; }
     td { padding: 3px 14px; text-align: right; color: #999; white-space: nowrap; }
@@ -51,52 +69,668 @@
     .rsi-ob { color: #ff4444 !important; }
     .rsi-os { color: #44cc44 !important; }
 
-    /* SHORT signal */
-    tr.signal-short { background: rgba(255, 210, 0, 0.07); }
-    .signal-tag { color: #ffcc00; font-size: 0.72rem; font-weight: bold; letter-spacing: 1px; }
+    /* Signal row highlights */
+    tr.signal-short { background: rgba(255, 110, 20, 0.10); }
+    tr.signal-long  { background: rgba(120, 220,  60, 0.08); }
+
+    /* Signal tags */
+    .signal-tag { font-size: 0.72rem; font-weight: bold; letter-spacing: 1px; }
+    .short-tag  { color: #ff8844; }
+    .long-tag   { color: #88dd44; }
+
+    /* Profit columns */
+    .profit-pos { color: #44cc44 !important; }
+    .profit-neg { color: #ff4444 !important; }
+
+    /* Pagination */
+    .pagination { display: flex; gap: 16px; align-items: center; margin-top: 16px; }
+    .page-btn {
+      background: #1a1a1a; border: 1px solid #2a2a2a; color: #555;
+      padding: 4px 14px; font-family: monospace; font-size: 0.78rem;
+      cursor: pointer; transition: border-color 0.15s, color 0.15s;
+    }
+    .page-btn:hover:not(:disabled) { border-color: #444; color: #aaa; }
+    .page-btn:disabled { opacity: 0.25; cursor: default; }
+    .page-info { font-size: 0.72rem; color: #444; }
+
+    /* Sidebar */
+    .sidebar {
+      min-width: 165px; border: 1px solid #1e1e1e;
+      background: #141414; padding: 16px; flex-shrink: 0;
+    }
+    .sidebar-title {
+      font-size: 0.7rem; color: #444; letter-spacing: 2px;
+      margin-bottom: 14px; text-transform: uppercase;
+    }
+    .sidebar-divider { border-top: 1px solid #1e1e1e; margin: 14px 0; }
+    .criteria-row { margin-bottom: 10px; }
+    .criteria-label { font-size: 0.68rem; color: #444; margin-bottom: 3px; display: block; }
+    .criteria-input {
+      background: #1a1a1a; border: 1px solid #252525; color: #bbb;
+      font-family: monospace; font-size: 0.8rem; padding: 4px 8px;
+      width: 100%; box-sizing: border-box;
+    }
+    .criteria-input:focus { outline: none; border-color: #555; color: #eee; }
+
+    /* Checkbox rows */
+    .criteria-check-wrap {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.68rem; color: #444; cursor: pointer; user-select: none;
+    }
+    .criteria-check-wrap input[type=checkbox] {
+      cursor: pointer; accent-color: #888; width: 11px; height: 11px;
+    }
+
+    /* Auto-order checkbox */
+    .auto-order-wrap {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.68rem; color: #444; cursor: pointer; user-select: none;
+    }
+    .auto-order-wrap input[type=checkbox] {
+      cursor: pointer; accent-color: #ffcc00; width: 11px; height: 11px;
+    }
+    .auto-order-wrap.on { color: #ffcc00; }
+
+    /* Order row */
+    .order-row { display: flex; gap: 6px; align-items: center; }
+    .short-btn {
+      background: none; border: 1px solid #3a1a1a; color: #663333;
+      font-family: monospace; font-size: 0.68rem; letter-spacing: 1px;
+      padding: 4px 10px; cursor: pointer; white-space: nowrap;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .short-btn:hover { border-color: #cc4444; color: #ff6666; background: #1a0808; }
+    .short-btn:disabled { opacity: 0.3; cursor: default; }
+
+    .reset-btn {
+      background: none; border: 1px solid #222; color: #333;
+      font-family: monospace; font-size: 0.68rem; letter-spacing: 1px;
+      padding: 5px 10px; cursor: pointer; width: 100%; margin-top: 8px;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .reset-btn:hover { border-color: #444; color: #666; }
 
     /* Misc */
-    .updated { font-size: 0.7rem; color: #333; margin-top: 20px; }
+    .updated { font-size: 0.7rem; color: #333; margin-top: 12px; }
     .status-msg { color: #333; font-size: 0.82rem; margin-top: 20px; }
+    .order-result {
+      font-size: 0.68rem; margin-top: 6px; min-height: 14px;
+      letter-spacing: 0.5px; word-break: break-all;
+    }
+    .order-result.ok  { color: #44cc44; }
+    .order-result.err { color: #ff4444; }
+
+    /* ── Instruments tab ────────────────────────────────────────── */
+    #tab-instruments { width: 100%; max-width: 1100px; }
+
+    .inst-toolbar {
+      display: flex; gap: 12px; align-items: center; margin-bottom: 12px; flex-wrap: wrap;
+    }
+    .inst-search {
+      background: #1a1a1a; border: 1px solid #252525; color: #bbb;
+      font-family: monospace; font-size: 0.82rem; padding: 5px 12px;
+      width: 240px; box-sizing: border-box;
+    }
+    .inst-search:focus { outline: none; border-color: #555; color: #eee; }
+    .inst-search::placeholder { color: #333; }
+
+    .inst-filter-btn {
+      background: #1a1a1a; border: 1px solid #2a2a2a; color: #555;
+      padding: 5px 14px; font-family: monospace; font-size: 0.75rem;
+      letter-spacing: 1px; cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .inst-filter-btn:hover { border-color: #444; color: #aaa; }
+    .inst-filter-btn.active { border-color: #555; color: #ccc; background: #1e1e1e; }
+    .inst-filter-new { border-color: #3a2808 !important; color: #886600 !important; }
+    .inst-filter-new:hover { border-color: #664400 !important; color: #ccaa33 !important; }
+    .inst-filter-new.active { border-color: #886600 !important; color: #ffcc44 !important; background: #1a1206 !important; }
+
+    .inst-count { font-size: 0.7rem; color: #333; margin-bottom: 10px; }
+
+    #inst-table th { text-align: left; cursor: pointer; user-select: none; }
+    #inst-table th:hover { color: #888; }
+    #inst-table td { text-align: left; }
+    #inst-table td.num { text-align: right; }
+
+    .status-trading  { color: #44cc44; }
+    .status-prelaunch { color: #ffcc44; }
+    .status-other    { color: #666; }
+    .fr-pos { color: #ff6644 !important; }
+    .fr-neg { color: #44cc44 !important; }
+
+    /* ── Overbought tab ─────────────────────────────────────────── */
+    #tab-overbought { width: 100%; max-width: 640px; }
+
+    .ob-toolbar {
+      display: flex; gap: 14px; align-items: center; margin-bottom: 20px;
+    }
+    .ob-scan-btn {
+      background: none; border: 1px solid #2a2a2a; color: #555;
+      font-family: monospace; font-size: 0.78rem; letter-spacing: 2px;
+      padding: 6px 18px; cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .ob-scan-btn:hover:not(:disabled) { border-color: #555; color: #ccc; }
+    .ob-scan-btn:disabled { opacity: 0.35; cursor: default; }
+    .ob-scan-btn.scanning { border-color: #665500; color: #aa8800;
+      animation: ob-pulse 1.2s ease-in-out infinite; }
+    @keyframes ob-pulse { 0%,100%{opacity:1} 50%{opacity:.45} }
+
+    .ob-meta { font-size: 0.7rem; color: #333; }
+
+    .ob-sub-nav { display: flex; gap: 2px; margin-bottom: 16px; }
+    .ob-sub-btn {
+      background: #1a1a1a; border: 1px solid #222; color: #444;
+      padding: 5px 20px; font-family: monospace; font-size: 0.76rem;
+      letter-spacing: 1px; cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .ob-sub-btn:hover { border-color: #333; color: #888; }
+    .ob-sub-btn.active { border-color: #555; color: #ccc; background: #1e1e1e; }
+
+    .ob-count { font-size: 0.7rem; color: #333; margin-bottom: 10px; }
+
+    #ob-table-1d th, #ob-table-4h th {
+      text-align: left; cursor: pointer; user-select: none;
+    }
+    #ob-table-1d th:hover, #ob-table-4h th:hover { color: #888; }
+    #ob-table-1d td, #ob-table-4h td { text-align: left; }
+    #ob-table-1d td.rsi-val, #ob-table-4h td.rsi-val { text-align: right; }
+
+    .ob-rsi-high  { color: #ff4444 !important; }
+    .ob-rsi-mid   { color: #ff8844 !important; }
+
+    .ob-settings {
+      border: 1px solid #1e1e1e; background: #141414;
+      padding: 16px 20px; margin-bottom: 20px;
+      display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end;
+    }
+    .ob-settings-title {
+      font-size: 0.68rem; color: #444; letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 12px;
+      width: 100%;
+    }
+    .ob-thresh-row { display: flex; flex-direction: column; gap: 4px; }
+    .ob-thresh-row label {
+      font-size: 0.68rem; color: #444; letter-spacing: 1px; white-space: nowrap;
+    }
+    .ob-thresh-row .tf-hint { font-size: 0.62rem; color: #333; margin-top: 1px; }
+    .ob-thresh-input {
+      background: #1a1a1a; border: 1px solid #252525; color: #bbb;
+      font-family: monospace; font-size: 0.82rem; padding: 5px 8px;
+      width: 72px; text-align: right; box-sizing: border-box;
+    }
+    .ob-thresh-input:focus { outline: none; border-color: #555; color: #eee; }
+    .ob-thresh-reset {
+      background: none; border: 1px solid #222; color: #333;
+      font-family: monospace; font-size: 0.68rem; letter-spacing: 1px;
+      padding: 5px 12px; cursor: pointer; align-self: flex-end;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .ob-thresh-reset:hover { border-color: #444; color: #666; }
   </style>
 </head>
 <body>
-  <h1>RSI MONITOR</h1>
 
-  <div class="selector" id="selector"></div>
-  <div class="ticker-title" id="ticker-title"></div>
+  <div class="tab-nav">
+    <button class="tab-nav-btn active" data-tab="rsi"         onclick="switchTab('rsi')">RSI MONITOR</button>
+    <button class="tab-nav-btn"        data-tab="instruments" onclick="switchTab('instruments')">INSTRUMENTS</button>
+    <button class="tab-nav-btn"        data-tab="overbought"  onclick="switchTab('overbought')">ПЕРЕКУПЛЕННЫЕ</button>
+  </div>
 
-  <table id="main-table" style="display:none">
-    <thead>
-      <tr>
-        <th>Timestamp</th>
-        <th>Price</th>
-        <th>RSI&nbsp;15m</th>
-        <th>RSI&nbsp;1H</th>
-        <th>RSI&nbsp;4H</th>
-        <th>RSI&nbsp;1D</th>
-        <th>Signal</th>
-      </tr>
-    </thead>
-    <tbody id="tbl-body"></tbody>
-  </table>
+  <!-- ═══════════════════ RSI tab ═══════════════════ -->
+  <div id="tab-rsi">
+    <h1>RSI MONITOR</h1>
 
-  <div class="status-msg" id="status-msg">Загрузка...</div>
-  <div class="updated" id="tbl-updated"></div>
+    <div class="selector" id="selector"></div>
+    <div class="interval-selector">
+      <button class="interval-btn" data-iv="1"  onclick="selectInterval(1)">1m</button>
+      <button class="interval-btn" data-iv="15" onclick="selectInterval(15)">15m</button>
+    </div>
+    <div class="ticker-title" id="ticker-title"></div>
+
+    <div class="content-wrap">
+      <div class="table-area">
+        <table id="main-table" style="display:none">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Price</th>
+              <th id="th-base">RSI&nbsp;15m</th>
+              <th>RSI&nbsp;1H</th>
+              <th>RSI&nbsp;4H</th>
+              <th>RSI&nbsp;1D</th>
+              <th>Signal</th>
+              <th>Потенц.&nbsp;%</th>
+              <th>Текущ.&nbsp;%</th>
+            </tr>
+          </thead>
+          <tbody id="tbl-body"></tbody>
+        </table>
+        <div class="pagination" id="pagination"></div>
+        <div class="status-msg" id="status-msg">Загрузка...</div>
+        <div class="updated" id="tbl-updated"></div>
+      </div>
+
+      <div class="sidebar" id="sidebar" style="display:none">
+
+        <!-- SHORT Criteria -->
+        <div class="sidebar-title">SHORT Criteria</div>
+        <div id="short-criteria-form"></div>
+        <button class="reset-btn" onclick="resetCriteria()">RESET SHORT</button>
+
+        <div class="sidebar-divider"></div>
+
+        <!-- LONG Criteria -->
+        <div class="sidebar-title">LONG Criteria</div>
+        <div id="long-criteria-form"></div>
+        <button class="reset-btn" onclick="resetLongCriteria()">RESET LONG</button>
+
+        <div class="sidebar-divider"></div>
+
+        <!-- Order -->
+        <div class="sidebar-title">Order</div>
+        <div class="criteria-row">
+          <label class="criteria-label">Сумма (USDT)</label>
+          <input class="criteria-input" id="sidebar-amount-input" type="number"
+                 min="1" max="100000" step="1" value="10">
+        </div>
+        <div class="criteria-row">
+          <label class="criteria-label">Плечо ×</label>
+          <input class="criteria-input" id="sidebar-lev-input" type="number"
+                 min="1" max="100" step="1" value="1">
+        </div>
+        <div class="criteria-row">
+          <label class="criteria-label">Take Profit %</label>
+          <input class="criteria-input" id="sidebar-tp-input" type="number"
+                 min="0.1" max="100" step="0.1" value="2.0">
+        </div>
+        <div class="criteria-row">
+          <label class="criteria-label">Stop Loss %</label>
+          <input class="criteria-input" id="sidebar-sl-input" type="number"
+                 min="0.1" max="100" step="0.1" value="10.0">
+        </div>
+        <button class="short-btn" id="sidebar-short-btn"
+                style="width:100%;margin-top:6px;padding:6px 0"
+                onclick="manualShort()">SHORT</button>
+        <div class="order-result" id="order-result"></div>
+        <div class="criteria-row" style="margin-top:10px">
+          <label class="auto-order-wrap" id="sidebar-auto-wrap">
+            <input type="checkbox" id="sidebar-auto-cb" onchange="toggleAutoOrder(this)">
+            Auto-order
+          </label>
+        </div>
+
+      </div>
+    </div>
+  </div><!-- #tab-rsi -->
+
+  <!-- ═══════════════════ Instruments tab ═══════════════════ -->
+  <div id="tab-instruments" style="display:none">
+    <h1>INSTRUMENTS</h1>
+
+    <div class="inst-toolbar">
+      <input class="inst-search" id="inst-search" placeholder="Поиск по символу / монете..."
+             oninput="filterInstruments()">
+      <button class="inst-filter-btn active" data-status="" onclick="setStatusFilter(this, '')">Все</button>
+      <button class="inst-filter-btn" data-status="Trading" onclick="setStatusFilter(this, 'Trading')">Trading</button>
+      <button class="inst-filter-btn" data-status="PreLaunch" onclick="setStatusFilter(this, 'PreLaunch')">PreLaunch</button>
+      <button class="inst-filter-btn inst-filter-new" data-status="__new__" onclick="setStatusFilter(this, '__new__')">New (&lt;30d)</button>
+    </div>
+
+    <div class="inst-count" id="inst-count"></div>
+
+    <table id="inst-table" style="display:none">
+      <thead>
+        <tr>
+          <th onclick="instSort('symbol')">Symbol</th>
+          <th onclick="instSort('status')">Status</th>
+          <th onclick="instSort('contractType')">Contract</th>
+          <th onclick="instSort('baseCoin')">Base</th>
+          <th onclick="instSort('settleCoin')">Settle</th>
+          <th onclick="instSort('tickSize')"    style="text-align:right">Tick&nbsp;Size</th>
+          <th onclick="instSort('minQty')"      style="text-align:right">Min&nbsp;Qty</th>
+          <th onclick="instSort('fundingRate')" style="text-align:right">Funding</th>
+          <th onclick="instSort('launchTime')">Launch</th>
+        </tr>
+      </thead>
+      <tbody id="inst-body"></tbody>
+    </table>
+
+    <div class="pagination" id="inst-pagination"></div>
+    <div class="status-msg" id="inst-status">Загрузка...</div>
+  </div><!-- #tab-instruments -->
+
+  <!-- ═══════════════════ Overbought tab ═══════════════════ -->
+  <div id="tab-overbought" style="display:none">
+    <h1>ПЕРЕКУПЛЕННЫЕ МОНЕТЫ</h1>
+
+    <div class="ob-toolbar">
+      <button class="ob-scan-btn" id="ob-scan-btn" onclick="startObScan()">СКАНИРОВАТЬ</button>
+      <span class="ob-meta" id="ob-meta"></span>
+    </div>
+
+    <div class="ob-settings">
+      <div class="ob-settings-title">Настройки порогов RSI</div>
+
+      <div class="ob-thresh-row">
+        <label for="ob-t-1d">RSI за 1 день</label>
+        <input class="ob-thresh-input" id="ob-t-1d" type="number" min="1" max="100" step="0.1"
+               oninput="onObThreshInput('1d', this.value)">
+        <span class="tf-hint">таймфрейм 1D</span>
+      </div>
+
+      <div class="ob-thresh-row">
+        <label for="ob-t-4h">RSI за 4 часа</label>
+        <input class="ob-thresh-input" id="ob-t-4h" type="number" min="1" max="100" step="0.1"
+               oninput="onObThreshInput('4h', this.value)">
+        <span class="tf-hint">таймфрейм 4H</span>
+      </div>
+
+      <div class="ob-thresh-row">
+        <label for="ob-t-1h">RSI за 1 час</label>
+        <input class="ob-thresh-input" id="ob-t-1h" type="number" min="1" max="100" step="0.1"
+               oninput="onObThreshInput('1h', this.value)">
+        <span class="tf-hint">таймфрейм 1H</span>
+      </div>
+
+      <div class="ob-thresh-row">
+        <label for="ob-t-15m">RSI за 15 минут</label>
+        <input class="ob-thresh-input" id="ob-t-15m" type="number" min="1" max="100" step="0.1"
+               oninput="onObThreshInput('15m', this.value)">
+        <span class="tf-hint">таймфрейм 15m</span>
+      </div>
+
+      <div class="ob-thresh-row">
+        <label for="ob-t-1m">RSI за 1 минуту</label>
+        <input class="ob-thresh-input" id="ob-t-1m" type="number" min="1" max="100" step="0.1"
+               oninput="onObThreshInput('1m', this.value)">
+        <span class="tf-hint">таймфрейм 1m</span>
+      </div>
+
+      <button class="ob-thresh-reset" onclick="resetObThresholds()">СБРОС</button>
+    </div>
+
+    <div class="ob-sub-nav">
+      <button class="ob-sub-btn active" data-ob="1d" onclick="switchObTab('1d')">1D RSI</button>
+      <button class="ob-sub-btn"        data-ob="4h" onclick="switchObTab('4h')">4H RSI</button>
+      <button class="ob-sub-btn"        data-ob="1h" onclick="switchObTab('1h')">1H RSI</button>
+      <button class="ob-sub-btn"        data-ob="15m" onclick="switchObTab('15m')">15m RSI</button>
+      <button class="ob-sub-btn"        data-ob="1m"  onclick="switchObTab('1m')">1m RSI</button>
+    </div>
+
+    <div class="ob-count" id="ob-count"></div>
+
+    <div id="ob-panel-1d">
+      <table id="ob-table-1d" style="display:none">
+        <thead><tr>
+          <th onclick="obSort('1d','symbol')">Symbol</th>
+          <th onclick="obSort('1d','rsi')" style="text-align:right">RSI 1D</th>
+        </tr></thead>
+        <tbody id="ob-body-1d"></tbody>
+      </table>
+    </div>
+
+    <div id="ob-panel-4h" style="display:none">
+      <table id="ob-table-4h" style="display:none">
+        <thead><tr>
+          <th onclick="obSort('4h','symbol')">Symbol</th>
+          <th onclick="obSort('4h','rsi')" style="text-align:right">RSI 4H</th>
+        </tr></thead>
+        <tbody id="ob-body-4h"></tbody>
+      </table>
+    </div>
+
+    <div id="ob-panel-1h" style="display:none">
+      <table id="ob-table-1h" style="display:none">
+        <thead><tr>
+          <th onclick="obSort('1h','symbol')">Symbol</th>
+          <th onclick="obSort('1h','rsi')" style="text-align:right">RSI 1H</th>
+        </tr></thead>
+        <tbody id="ob-body-1h"></tbody>
+      </table>
+    </div>
+
+    <div id="ob-panel-15m" style="display:none">
+      <table id="ob-table-15m" style="display:none">
+        <thead><tr>
+          <th onclick="obSort('15m','symbol')">Symbol</th>
+          <th onclick="obSort('15m','rsi')" style="text-align:right">RSI 15m</th>
+        </tr></thead>
+        <tbody id="ob-body-15m"></tbody>
+      </table>
+    </div>
+
+    <div id="ob-panel-1m" style="display:none">
+      <table id="ob-table-1m" style="display:none">
+        <thead><tr>
+          <th onclick="obSort('1m','symbol')">Symbol</th>
+          <th onclick="obSort('1m','rsi')" style="text-align:right">RSI 1m</th>
+        </tr></thead>
+        <tbody id="ob-body-1m"></tbody>
+      </table>
+    </div>
+
+    <div class="status-msg" id="ob-status">Нажмите СКАНИРОВАТЬ для загрузки данных</div>
+  </div><!-- #tab-overbought -->
 
   <script>
-    let currentTicker = null;
+    /* ══════════════════════════════════════════════════════════════
+       Tab switching
+    ══════════════════════════════════════════════════════════════ */
+    function switchTab(name) {
+      document.querySelectorAll('.tab-nav-btn').forEach(btn =>
+        btn.classList.toggle('active', btn.dataset.tab === name));
+      document.getElementById('tab-rsi').style.display         = name === 'rsi'         ? '' : 'none';
+      document.getElementById('tab-instruments').style.display = name === 'instruments' ? '' : 'none';
+      document.getElementById('tab-overbought').style.display  = name === 'overbought'  ? '' : 'none';
+      if (name === 'instruments' && !instLoaded) loadInstruments();
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       RSI Monitor
+    ══════════════════════════════════════════════════════════════ */
+    const PAGE_SIZE = 50;
+    let currentTicker      = null;
+    let currentInterval    = 15;
+    let allRows            = [];
+    let calcedRows         = [];
+    let currentPage        = 0;
+    let serverCriteria     = {};
+    let localCriteria      = {};
+    let serverLongCriteria = {};
+    let localLongCriteria  = {};
+    let autoOrderState     = {};
+
+    let _lastTickerLoaded = null;
+
+    /* ── helpers ─────────────────────────────────────────────────── */
+    function roundTo(v, p) { return Math.round(v * Math.pow(10, p)) / Math.pow(10, p); }
+
+    function fmt(val)    { return val !== null && val !== undefined ? Number(val).toFixed(2) : '—'; }
+    function fmtPct(val) {
+      if (val === null || val === undefined) return '';
+      return (val > 0 ? '+' : '') + Number(val).toFixed(2) + '%';
+    }
+    function profitClass(val) {
+      if (val === null || val === undefined) return '';
+      return val > 0 ? 'profit-pos' : val < 0 ? 'profit-neg' : '';
+    }
+
+    /* ── signal recalculation (client-side) ─────────────────────── */
+    function recalcSignals(rows, sc, lc) {
+      const p        = sc.price_precision || 5;
+      const useDayH  = sc.use_day_high !== false;
+      const useDayL  = lc && (lc.use_day_low !== false);
+      const lp       = lc ? (lc.price_precision || 5) : p;
+      const curPrice = rows.length ? rows[0].price : null;
+
+      return rows.map((row, i) => {
+        // SHORT
+        const dayH    = row.day_high_so_far;
+        const dayHOk  = !useDayH || (dayH !== null && roundTo(row.price, p) > roundTo(dayH, p));
+        const isShort = dayHOk &&
+          row.rsi_15m !== null && row.rsi_15m > sc.rsi_15m &&
+          row.rsi_1h  !== null && row.rsi_1h  > sc.rsi_1h  &&
+          row.rsi_4h  !== null && row.rsi_4h  > sc.rsi_4h  &&
+          row.rsi_1d  !== null && row.rsi_1d  > sc.rsi_1d;
+
+        // LONG
+        let isLong = false;
+        if (lc) {
+          const dayL   = row.day_low_so_far;
+          const dayLOk = !useDayL || (dayL !== null && roundTo(row.price, lp) < roundTo(dayL, lp));
+          isLong = dayLOk &&
+            row.rsi_15m !== null && row.rsi_15m < lc.rsi_15m &&
+            row.rsi_1h  !== null && row.rsi_1h  < lc.rsi_1h  &&
+            row.rsi_4h  !== null && row.rsi_4h  < lc.rsi_4h  &&
+            row.rsi_1d  !== null && row.rsi_1d  < lc.rsi_1d;
+        }
+
+        const pricesAfter = rows.slice(0, i).map(r => r.price);
+
+        let potential_profit_pct = null, current_profit_pct = null;
+        let long_potential_profit_pct = null, long_current_profit_pct = null;
+
+        if (isShort && curPrice !== null) {
+          const sp = row.price;
+          if (pricesAfter.length)
+            potential_profit_pct = +((sp - Math.min(...pricesAfter)) / sp * 100).toFixed(2);
+          current_profit_pct = +((sp - curPrice) / sp * 100).toFixed(2);
+        }
+        if (isLong && curPrice !== null) {
+          const sp = row.price;
+          if (pricesAfter.length)
+            long_potential_profit_pct = +((Math.max(...pricesAfter) - sp) / sp * 100).toFixed(2);
+          long_current_profit_pct = +((curPrice - sp) / sp * 100).toFixed(2);
+        }
+
+        return { ...row, is_short: isShort, is_long: isLong,
+          potential_profit_pct, current_profit_pct,
+          long_potential_profit_pct, long_current_profit_pct };
+      });
+    }
+
+    /* ── criteria forms ─────────────────────────────────────────── */
+    const RSI_FIELDS = [
+      { key: 'rsi_15m', labelTpl: iv => `RSI ${iv}m` },
+      { key: 'rsi_1h',  labelTpl: _  => 'RSI 1H'    },
+      { key: 'rsi_4h',  labelTpl: _  => 'RSI 4H'    },
+      { key: 'rsi_1d',  labelTpl: _  => 'RSI 1D'    },
+    ];
+
+    function buildShortCriteriaForm() {
+      const useDay = localCriteria.use_day_high !== false;
+      document.getElementById('short-criteria-form').innerHTML =
+        RSI_FIELDS.map(f => `
+          <div class="criteria-row">
+            <label class="criteria-label">${f.labelTpl(currentInterval)}</label>
+            <input class="criteria-input" type="number" min="0" max="100" step="0.1"
+                   data-key="${f.key}" value="${localCriteria[f.key] ?? ''}"
+                   oninput="onShortInput(this)">
+          </div>`).join('') + `
+        <div class="criteria-row" style="margin-top:4px">
+          <label class="criteria-check-wrap">
+            <input type="checkbox" id="use-day-high-cb" ${useDay ? 'checked' : ''}
+                   onchange="onUseDayHighChange(this)">
+            Use day high
+          </label>
+        </div>`;
+    }
+
+    function buildLongCriteriaForm() {
+      const useDay = localLongCriteria.use_day_low !== false;
+      document.getElementById('long-criteria-form').innerHTML =
+        RSI_FIELDS.map(f => `
+          <div class="criteria-row">
+            <label class="criteria-label">${f.labelTpl(currentInterval)}</label>
+            <input class="criteria-input" type="number" min="0" max="100" step="0.1"
+                   data-key="${f.key}" value="${localLongCriteria[f.key] ?? ''}"
+                   oninput="onLongInput(this)">
+          </div>`).join('') + `
+        <div class="criteria-row" style="margin-top:4px">
+          <label class="criteria-check-wrap">
+            <input type="checkbox" id="use-day-low-cb" ${useDay ? 'checked' : ''}
+                   onchange="onUseDayLowChange(this)">
+            Use day low
+          </label>
+        </div>`;
+    }
+
+    /* ── localStorage persistence ───────────────────────────────── */
+    function _lsKey(symbol, kind) { return `rsi_${kind}_${symbol}`; }
+
+    function saveCriteria(symbol) {
+      if (!symbol) return;
+      try {
+        localStorage.setItem(_lsKey(symbol, 'short'), JSON.stringify(localCriteria));
+        localStorage.setItem(_lsKey(symbol, 'long'),  JSON.stringify(localLongCriteria));
+      } catch (e) {
+        console.error('[saveCriteria]', e);
+      }
+    }
+
+    function loadSavedShort(symbol) {
+      try { const s = localStorage.getItem(_lsKey(symbol, 'short')); return s ? JSON.parse(s) : null; }
+      catch { return null; }
+    }
+    function loadSavedLong(symbol) {
+      try { const s = localStorage.getItem(_lsKey(symbol, 'long'));  return s ? JSON.parse(s) : null; }
+      catch { return null; }
+    }
+
+    function onShortInput(input) {
+      const val = parseFloat(input.value);
+      if (!isNaN(val)) {
+        localCriteria[input.dataset.key] = val;
+        saveCriteria(currentTicker);
+        applyAndRender();
+      }
+    }
+    function onLongInput(input) {
+      const val = parseFloat(input.value);
+      if (!isNaN(val)) {
+        localLongCriteria[input.dataset.key] = val;
+        saveCriteria(currentTicker);
+        applyAndRender();
+      }
+    }
+    function onUseDayHighChange(cb) {
+      localCriteria.use_day_high = cb.checked;
+      saveCriteria(currentTicker);
+      applyAndRender();
+    }
+    function onUseDayLowChange(cb) {
+      localLongCriteria.use_day_low = cb.checked;
+      saveCriteria(currentTicker);
+      applyAndRender();
+    }
+
+    function resetCriteria() {
+      localCriteria = { ...serverCriteria };
+      localStorage.removeItem(_lsKey(currentTicker, 'short'));
+      buildShortCriteriaForm();
+      applyAndRender();
+    }
+    function resetLongCriteria() {
+      localLongCriteria = { ...serverLongCriteria };
+      localStorage.removeItem(_lsKey(currentTicker, 'long'));
+      buildLongCriteriaForm();
+      applyAndRender();
+    }
+
+    function applyAndRender() {
+      calcedRows = recalcSignals(allRows, localCriteria, localLongCriteria);
+      renderPage();
+    }
 
     /* ── colour helpers ─────────────────────────────────────────── */
     function colorSets(values) {
-      const valid = values.filter(v => v !== null);
+      const valid  = values.filter(v => v !== null);
       const sorted = [...valid].sort((a, b) => a - b);
-      return {
-        minSet: new Set(sorted.slice(0, 5)),
-        maxSet: new Set(sorted.slice(-5)),
-      };
+      return { minSet: new Set(sorted.slice(0, 5)), maxSet: new Set(sorted.slice(-5)) };
     }
-
     function rsiClass(val, { minSet, maxSet }) {
       if (val === null) return '';
       if (maxSet.has(val)) return 'rsi-ob';
@@ -104,88 +738,560 @@
       return '';
     }
 
-    function fmt(val) {
-      return val !== null && val !== undefined ? Number(val).toFixed(2) : '—';
+    /* ── pagination ─────────────────────────────────────────────── */
+    function renderPagination(total) {
+      const totalPages = Math.ceil(total / PAGE_SIZE);
+      const pg = document.getElementById('pagination');
+      if (totalPages <= 1) { pg.innerHTML = ''; return; }
+      pg.innerHTML = `
+        <button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===0?'disabled':''}>← Пред</button>
+        <span class="page-info">${currentPage+1} / ${totalPages} &nbsp;(${total} строк)</span>
+        <button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage>=totalPages-1?'disabled':''}>След →</button>`;
     }
+    function goPage(n) { currentPage = n; renderPage(); }
 
-    /* ── render detail table ────────────────────────────────────── */
-    function renderDetail(rows) {
-      if (!rows.length) {
+    /* ── render ─────────────────────────────────────────────────── */
+    function renderPage() {
+      if (!calcedRows.length) {
         document.getElementById('status-msg').textContent = 'Нет данных';
         return;
       }
+      const page = calcedRows.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+      const csPr = colorSets(calcedRows.map(r => r.price));
+      const cs15 = colorSets(calcedRows.map(r => r.rsi_15m));
+      const cs1h = colorSets(calcedRows.map(r => r.rsi_1h));
+      const cs4h = colorSets(calcedRows.map(r => r.rsi_4h));
+      const cs1d = colorSets(calcedRows.map(r => r.rsi_1d));
 
-      const csPr  = colorSets(rows.map(r => r.price));
-      const cs15  = colorSets(rows.map(r => r.rsi_15m));
-      const cs1h  = colorSets(rows.map(r => r.rsi_1h));
-      const cs4h  = colorSets(rows.map(r => r.rsi_4h));
-      const cs1d  = colorSets(rows.map(r => r.rsi_1d));
-
-      document.getElementById('tbl-body').innerHTML = rows.map(r => {
-        const isShort = r.is_short;
-        return `<tr${isShort ? ' class="signal-short"' : ''}>
+      document.getElementById('tbl-body').innerHTML = page.map(r => {
+        const isS = r.is_short, isL = r.is_long;
+        const rowCls  = isS ? 'signal-short' : isL ? 'signal-long' : '';
+        const sigCell = (isS ? '<span class="signal-tag short-tag">SHORT</span>' : '') +
+                        (isL ? '<span class="signal-tag long-tag">LONG</span>'  : '');
+        const pPct = isS ? r.potential_profit_pct : (isL ? r.long_potential_profit_pct : null);
+        const cPct = isS ? r.current_profit_pct   : (isL ? r.long_current_profit_pct   : null);
+        return `<tr${rowCls ? ` class="${rowCls}"` : ''}>
           <td>${r.time}</td>
           <td class="${rsiClass(r.price, csPr)}">${Number(r.price).toFixed(5)}</td>
           <td class="${rsiClass(r.rsi_15m, cs15)}">${fmt(r.rsi_15m)}</td>
           <td class="${rsiClass(r.rsi_1h,  cs1h)}">${fmt(r.rsi_1h)}</td>
           <td class="${rsiClass(r.rsi_4h,  cs4h)}">${fmt(r.rsi_4h)}</td>
           <td class="${rsiClass(r.rsi_1d,  cs1d)}">${fmt(r.rsi_1d)}</td>
-          <td>${isShort ? '<span class="signal-tag">SHORT</span>' : ''}</td>
+          <td>${sigCell}</td>
+          <td class="${profitClass(pPct)}">${fmtPct(pPct)}</td>
+          <td class="${profitClass(cPct)}">${fmtPct(cPct)}</td>
         </tr>`;
       }).join('');
 
+      renderPagination(calcedRows.length);
       document.getElementById('status-msg').style.display = 'none';
       document.getElementById('main-table').style.display = 'table';
+      document.getElementById('sidebar').style.display = 'block';
     }
 
-    /* ── load selected ticker ───────────────────────────────────── */
-    async function loadTicker(symbol) {
+    /* ── load ticker ─────────────────────────────────────────────── */
+    async function loadTicker(symbol, interval) {
       document.getElementById('status-msg').textContent = 'Загрузка...';
       document.getElementById('status-msg').style.display = 'block';
       document.getElementById('main-table').style.display = 'none';
+      document.getElementById('pagination').innerHTML = '';
       try {
-        const res  = await fetch(`/api/ticker/${symbol}`);
+        const res  = await fetch(`/api/ticker/${symbol}?interval=${interval}`);
         const json = await res.json();
         if (json.error) throw new Error(json.error);
+
         document.getElementById('ticker-title').textContent = `${symbol} — RSI-14`;
-        document.getElementById('tbl-updated').textContent = json.updated_at ? 'Updated: ' + json.updated_at : '';
-        renderDetail(json.data || []);
+        document.getElementById('th-base').textContent      = `RSI ${interval}m`;
+        document.getElementById('tbl-updated').textContent  =
+          json.updated_at ? 'Updated: ' + json.updated_at : '';
+
+        allRows     = json.data || [];
+        currentPage = 0;
+
+        serverCriteria     = json.criteria      || {};
+        serverLongCriteria = json.long_criteria || {};
+
+        if (symbol !== _lastTickerLoaded) {
+          localCriteria     = loadSavedShort(symbol) ?? { ...serverCriteria };
+          localLongCriteria = loadSavedLong(symbol)  ?? { ...serverLongCriteria };
+          _lastTickerLoaded = symbol;
+        }
+
+        buildShortCriteriaForm();
+        buildLongCriteriaForm();
+        applyAndRender();
+
       } catch (e) {
         console.error(e);
         document.getElementById('status-msg').textContent = 'Ошибка загрузки: ' + e.message;
       }
     }
 
-    /* ── ticker selection ───────────────────────────────────────── */
-    function selectTicker(symbol) {
-      currentTicker = symbol;
-      document.querySelectorAll('.ticker-btn').forEach(btn =>
-        btn.classList.toggle('active', btn.dataset.ticker === symbol)
-      );
-      loadTicker(symbol);
+    /* ── interval / ticker selection ────────────────────────────── */
+    function selectInterval(iv) {
+      currentInterval = iv;
+      localStorage.setItem('rsi_interval', iv);
+      document.querySelectorAll('.interval-btn').forEach(btn =>
+        btn.classList.toggle('active', Number(btn.dataset.iv) === iv));
+      if (currentTicker) loadTicker(currentTicker, iv);
     }
 
-    /* ── init ───────────────────────────────────────────────────── */
+    function selectTicker(symbol) {
+      currentTicker = symbol;
+      localStorage.setItem('rsi_ticker', symbol);
+      document.querySelectorAll('.ticker-btn').forEach(btn =>
+        btn.classList.toggle('active', btn.dataset.ticker === symbol));
+      updateSidebarOrderSection();
+      loadTicker(symbol, currentInterval);
+    }
+
+    /* ── auto-order (sidebar) ───────────────────────────────────── */
+    async function toggleAutoOrder(checkbox) {
+      if (!currentTicker) return;
+      const enabled = checkbox.checked;
+      try {
+        const res  = await fetch(`/api/auto-order/${currentTicker}?enabled=${enabled}`, { method: 'POST' });
+        const json = await res.json();
+        if (json.error) { checkbox.checked = !enabled; return; }
+        autoOrderState[currentTicker] = json.enabled;
+        checkbox.closest('.auto-order-wrap').classList.toggle('on', json.enabled);
+      } catch (e) { checkbox.checked = !enabled; }
+    }
+
+    /* ── manual short (sidebar) ─────────────────────────────────── */
+    async function manualShort() {
+      if (!currentTicker) return;
+      const btn      = document.getElementById('sidebar-short-btn');
+      const resultEl = document.getElementById('order-result');
+      const tp_pct   = (parseFloat(document.getElementById('sidebar-tp-input').value)    || 2)   / 100;
+      const sl_pct   = (parseFloat(document.getElementById('sidebar-sl-input').value)     || 10)  / 100;
+      const amount   =  parseFloat(document.getElementById('sidebar-amount-input').value) || 10;
+      const leverage =  parseInt(document.getElementById('sidebar-lev-input').value)      || 1;
+
+      btn.disabled = true; btn.textContent = '...';
+      resultEl.textContent = ''; resultEl.className = 'order-result';
+
+      try {
+        const params = new URLSearchParams({ tp_pct, sl_pct, amount, leverage });
+        const res  = await fetch(`/api/short/${currentTicker}?${params}`, { method: 'POST' });
+        const json = await res.json();
+        if (json.error) {
+          btn.textContent = 'ERR';
+          resultEl.textContent = json.error;
+          resultEl.className = 'order-result err';
+        } else {
+          btn.textContent = 'OK';
+          resultEl.textContent =
+            `${currentTicker} · $${amount} · ${leverage}× · TP ${(tp_pct*100).toFixed(1)}% · SL ${(sl_pct*100).toFixed(1)}% · @ ${json.price}`;
+          resultEl.className = 'order-result ok';
+        }
+      } catch (e) {
+        btn.textContent = 'ERR';
+        resultEl.textContent = String(e);
+        resultEl.className = 'order-result err';
+      }
+      setTimeout(() => { btn.textContent = 'SHORT'; btn.disabled = false; }, 3000);
+    }
+
+    function updateSidebarOrderSection() {
+      const cb = document.getElementById('sidebar-auto-cb');
+      if (!cb || !currentTicker) return;
+      const on = autoOrderState[currentTicker] || false;
+      cb.checked = on;
+      cb.closest('.auto-order-wrap').classList.toggle('on', on);
+    }
+
+    function renderSelector(tickers) {
+      document.getElementById('selector').innerHTML = tickers.map(t =>
+        `<button class="ticker-btn" data-ticker="${t}" onclick="selectTicker('${t}')">${t}</button>`
+      ).join('');
+    }
+
+    /* ── RSI init ───────────────────────────────────────────────── */
     async function init() {
       try {
-        const res  = await fetch('/api/table');
-        const json = await res.json();
-        const tickers = json.tickers || [];
+        const savedIv = Number(localStorage.getItem('rsi_interval')) || 15;
+        currentInterval = [1, 15].includes(savedIv) ? savedIv : 15;
+        document.querySelectorAll('.interval-btn').forEach(btn =>
+          btn.classList.toggle('active', Number(btn.dataset.iv) === currentInterval));
 
-        const selector = document.getElementById('selector');
-        selector.innerHTML = tickers.map(t =>
-          `<button class="ticker-btn" data-ticker="${t}" onclick="selectTicker('${t}')">${t}</button>`
-        ).join('');
+        const [tableRes, aoRes] = await Promise.all([fetch('/api/table'), fetch('/api/auto-order')]);
+        const tableJson = await tableRes.json();
+        autoOrderState  = await aoRes.json();
 
-        if (tickers.length > 0) selectTicker(tickers[0]);
+        const tickers = tableJson.tickers || [];
+        renderSelector(tickers);
+
+        const saved   = localStorage.getItem('rsi_ticker');
+        const initial = (saved && tickers.includes(saved)) ? saved : tickers[0];
+        if (initial) selectTicker(initial);
       } catch (e) {
         console.error(e);
         document.getElementById('status-msg').textContent = 'Не удалось загрузить список тикеров';
       }
     }
 
+    async function refreshTickerList() {
+      try {
+        const res     = await fetch('/api/table');
+        const json    = await res.json();
+        const tickers = json.tickers || [];
+        renderSelector(tickers);
+        // re-highlight the active ticker button
+        document.querySelectorAll('.ticker-btn').forEach(btn =>
+          btn.classList.toggle('active', btn.dataset.ticker === currentTicker));
+      } catch (_) {}
+    }
+
     init();
-    setInterval(() => { if (currentTicker) loadTicker(currentTicker); }, 60000);
+    setInterval(() => {
+      if (currentTicker) loadTicker(currentTicker, currentInterval);
+      refreshTickerList();
+    }, 60000);
+
+    /* ══════════════════════════════════════════════════════════════
+       Instruments tab
+    ══════════════════════════════════════════════════════════════ */
+    const INST_PAGE_SIZE = 50;
+    let instLoaded          = false;
+    let allInstruments      = [];
+    let filteredInstruments = [];
+    let instPage            = 0;
+    let instSortKey         = 'symbol';
+    let instSortAsc         = true;
+    let instStatusFilter    = '';
+
+    async function loadInstruments() {
+      document.getElementById('inst-status').textContent = 'Загрузка...';
+      document.getElementById('inst-status').style.display = 'block';
+      try {
+        const res  = await fetch('/api/instruments');
+        const json = await res.json();
+        if (json.error) throw new Error(json.error);
+
+        // Only USDT-quoted, flatten nested price/lot filters for easy sorting
+        allInstruments = (json.instruments || [])
+          .filter(i => i.quoteCoin === 'USDT' && i.contractType === 'LinearPerpetual')
+          .map(i => ({
+            ...i,
+            tickSize:    parseFloat(i.priceFilter?.tickSize      || 0),
+            minQty:      parseFloat(i.lotSizeFilter?.minOrderQty || 0),
+            fundingRate: parseFloat(i.fundingRate ?? 'NaN'),
+          }));
+        instLoaded = true;
+        filterInstruments();
+      } catch (e) {
+        document.getElementById('inst-status').textContent = 'Ошибка загрузки: ' + e.message;
+      }
+    }
+
+    function setStatusFilter(btn, status) {
+      instStatusFilter = status;
+      document.querySelectorAll('.inst-filter-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.status === status));
+      instPage = 0;
+      filterInstruments();
+    }
+
+    function filterInstruments() {
+      const q         = document.getElementById('inst-search').value.trim().toUpperCase();
+      const monthAgo  = Date.now() - 30 * 24 * 60 * 60 * 1000;
+      filteredInstruments = allInstruments.filter(i => {
+        if (instStatusFilter === '__new__') {
+          if (parseInt(i.launchTime || 0) < monthAgo) return false;
+        } else if (instStatusFilter && i.status !== instStatusFilter) {
+          return false;
+        }
+        if (q && !i.symbol.includes(q) && !i.baseCoin.toUpperCase().includes(q)) return false;
+        return true;
+      });
+      instPage = 0;
+      sortAndRenderInstruments();
+    }
+
+    function instSort(key) {
+      if (instSortKey === key) instSortAsc = !instSortAsc;
+      else { instSortKey = key; instSortAsc = true; }
+      instPage = 0;
+      sortAndRenderInstruments();
+    }
+
+    function sortAndRenderInstruments() {
+      const key = instSortKey;
+      const asc = instSortAsc ? 1 : -1;
+      filteredInstruments.sort((a, b) => {
+        const av = a[key] ?? '', bv = b[key] ?? '';
+        if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * asc;
+        return String(av).localeCompare(String(bv)) * asc;
+      });
+      renderInstruments();
+    }
+
+    function renderInstruments() {
+      const total = filteredInstruments.length;
+
+      if (!total) {
+        document.getElementById('inst-count').textContent = allInstruments.length ? 'Ничего не найдено' : '';
+        document.getElementById('inst-status').textContent = allInstruments.length ? '' : 'Нет данных';
+        document.getElementById('inst-status').style.display = 'block';
+        document.getElementById('inst-table').style.display  = 'none';
+        document.getElementById('inst-pagination').innerHTML = '';
+        return;
+      }
+
+      const start = instPage * INST_PAGE_SIZE;
+      const page  = filteredInstruments.slice(start, start + INST_PAGE_SIZE);
+
+      document.getElementById('inst-count').textContent =
+        `${total} инструментов (стр. ${instPage + 1} / ${Math.ceil(total / INST_PAGE_SIZE)})`;
+
+      document.getElementById('inst-body').innerHTML = page.map(i => {
+        const launchMs   = parseInt(i.launchTime || 0);
+        const launchDate = launchMs ? new Date(launchMs).toLocaleDateString('ru-RU') : '—';
+        const statusCls  = i.status === 'Trading'   ? 'status-trading'
+                         : i.status === 'PreLaunch' ? 'status-prelaunch'
+                         : 'status-other';
+        const tickFmt = i.tickSize ? i.tickSize.toString() : '—';
+        const minQFmt = i.minQty   ? i.minQty.toString()   : '—';
+        const fr      = i.fundingRate;
+        const frFmt   = isNaN(fr) ? '—' : (fr >= 0 ? '+' : '') + (fr * 100).toFixed(4) + '%';
+        const frCls   = isNaN(fr) ? '' : fr > 0 ? 'fr-pos' : fr < 0 ? 'fr-neg' : '';
+        return `<tr>
+          <td style="color:#ccc;font-weight:bold">${i.symbol}</td>
+          <td class="${statusCls}">${i.status || '—'}</td>
+          <td>${i.contractType || '—'}</td>
+          <td>${i.baseCoin  || '—'}</td>
+          <td>${i.settleCoin || i.quoteCoin || '—'}</td>
+          <td class="num">${tickFmt}</td>
+          <td class="num">${minQFmt}</td>
+          <td class="num ${frCls}">${frFmt}</td>
+          <td>${launchDate}</td>
+        </tr>`;
+      }).join('');
+
+      document.getElementById('inst-status').style.display = 'none';
+      document.getElementById('inst-table').style.display  = 'table';
+
+      // Pagination
+      const totalPages = Math.ceil(total / INST_PAGE_SIZE);
+      const pg = document.getElementById('inst-pagination');
+      if (totalPages <= 1) { pg.innerHTML = ''; return; }
+      pg.innerHTML = `
+        <button class="page-btn" onclick="instGoPage(${instPage-1})" ${instPage===0?'disabled':''}>← Пред</button>
+        <span class="page-info">${instPage+1} / ${totalPages} &nbsp;(${total} строк)</span>
+        <button class="page-btn" onclick="instGoPage(${instPage+1})" ${instPage>=totalPages-1?'disabled':''}>След →</button>`;
+    }
+
+    function instGoPage(n) { instPage = n; renderInstruments(); }
+
+    /* ══════════════════════════════════════════════════════════════
+       Overbought tab
+    ══════════════════════════════════════════════════════════════ */
+    /* ── конфигурация под-вкладок ──────────────────────────────── */
+    const OB_TABS = {
+      '1d':  { key: 'rsi_1d',  label: 'RSI 1D'  },
+      '4h':  { key: 'rsi_4h',  label: 'RSI 4H'  },
+      '1h':  { key: 'rsi_1h',  label: 'RSI 1H'  },
+      '15m': { key: 'rsi_15m', label: 'RSI 15m' },
+      '1m':  { key: 'rsi_1m',  label: 'RSI 1m'  },
+    };
+
+    // Дефолты (перезаписываются ответом сервера, содержат значения из config.py)
+    let obDefaults   = { '1d': 85, '4h': 82, '1h': 82, '15m': 85, '1m': 92 };
+    // Текущие пороги (из localStorage или дефолтов)
+    let obThresholds = { ...obDefaults };
+
+    let obCurrentTab = '1d';
+    let obRows       = { '1d': [], '4h': [], '1h': [], '15m': [], '1m': [] };
+    let obRawState   = {};   // полный результат сканирования для re-filter при смене порога
+    let obSortKey    = { '1d': 'rsi', '4h': 'rsi', '1h': 'rsi', '15m': 'rsi', '1m': 'rsi' };
+    let obSortAsc    = { '1d': false, '4h': false, '1h': false, '15m': false, '1m': false };
+    let obPollTimer  = null;
+
+    /* ── пороги: localStorage ───────────────────────────────────── */
+    function _loadObThresholds() {
+      try {
+        const s = localStorage.getItem('ob_thresholds');
+        if (s) obThresholds = { ...obDefaults, ...JSON.parse(s) };
+      } catch (_) {}
+      _syncThreshInputs();
+    }
+
+    function _saveObThresholds() {
+      try { localStorage.setItem('ob_thresholds', JSON.stringify(obThresholds)); } catch (_) {}
+    }
+
+    function _syncThreshInputs() {
+      for (const tab of Object.keys(OB_TABS)) {
+        const el = document.getElementById(`ob-t-${tab}`);
+        if (el) el.value = obThresholds[tab];
+      }
+    }
+
+    function onObThreshInput(tab, val) {
+      const v = parseFloat(val);
+      if (isNaN(v) || v <= 0 || v > 100) return;
+      obThresholds[tab] = v;
+      _saveObThresholds();
+      // немедленно перефильтровываем имеющиеся данные
+      if (Object.keys(obRawState).length) _applyThresholds();
+    }
+
+    function resetObThresholds() {
+      obThresholds = { ...obDefaults };
+      _saveObThresholds();
+      _syncThreshInputs();
+      if (Object.keys(obRawState).length) _applyThresholds();
+    }
+
+    /* ── фильтрация по текущим порогам ─────────────────────────── */
+    function _applyThresholds() {
+      for (const [tab, cfg] of Object.entries(OB_TABS)) {
+        const thresh = obThresholds[tab];
+        obRows[tab] = Object.entries(obRawState)
+          .filter(([, v]) => v[cfg.key] !== null && v[cfg.key] > thresh)
+          .map(([sym, v]) => ({ symbol: sym, rsi: v[cfg.key] }));
+      }
+      Object.keys(OB_TABS).forEach(renderObTab);
+    }
+
+    /* ── переключение под-вкладок ───────────────────────────────── */
+    function switchObTab(tab) {
+      obCurrentTab = tab;
+      document.querySelectorAll('.ob-sub-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.ob === tab));
+      Object.keys(OB_TABS).forEach(t =>
+        document.getElementById(`ob-panel-${t}`).style.display = t === tab ? '' : 'none');
+      renderObTab(tab);
+    }
+
+    /* ── сканирование ───────────────────────────────────────────── */
+    async function startObScan() {
+      const btn = document.getElementById('ob-scan-btn');
+      btn.disabled = true;
+      btn.classList.add('scanning');
+      btn.textContent = 'СКАНИРОВАНИЕ...';
+      document.getElementById('ob-meta').textContent = '';
+      document.getElementById('ob-status').textContent = 'Запуск сканирования...';
+      document.getElementById('ob-status').style.display = 'block';
+
+      try {
+        const res  = await fetch('/api/overbought/scan', { method: 'POST' });
+        const json = await res.json();
+        if (json.error) throw new Error(json.error);
+
+        if (json.status === 'cached') {
+          applyObState(json);
+          resetObBtn();
+        } else {
+          document.getElementById('ob-status').textContent =
+            json.count ? `Сканирую ${json.count} монет — подождите...` : 'Сканирование...';
+          obPollTimer = setInterval(pollObState, 2000);
+        }
+      } catch (e) {
+        document.getElementById('ob-status').textContent = 'Ошибка: ' + e.message;
+        resetObBtn();
+      }
+    }
+
+    async function pollObState() {
+      try {
+        const res  = await fetch('/api/overbought');
+        const json = await res.json();
+        if (!json.is_scanning) {
+          clearInterval(obPollTimer);
+          obPollTimer = null;
+          applyObState(json);
+          resetObBtn();
+        }
+      } catch (_) { /* retry next tick */ }
+    }
+
+    function applyObState(json) {
+      // Обновляем дефолты из конфига сервера
+      if (json.defaults) {
+        const d = json.defaults;
+        obDefaults = {
+          '1d':  d.rsi_1d  ?? obDefaults['1d'],
+          '4h':  d.rsi_4h  ?? obDefaults['4h'],
+          '1h':  d.rsi_1h  ?? obDefaults['1h'],
+          '15m': d.rsi_15m ?? obDefaults['15m'],
+          '1m':  d.rsi_1m  ?? obDefaults['1m'],
+        };
+      }
+
+      obRawState = json.state || {};
+      _applyThresholds();
+
+      // Send only tickers that passed at least one RSI threshold to RSI Monitor
+      const passedSymbols = Object.keys(obRawState).filter(sym => {
+        const d = obRawState[sym];
+        return Object.entries(OB_TABS).some(([tab, cfg]) =>
+          d[cfg.key] != null && d[cfg.key] > (obThresholds[tab] ?? obDefaults[tab])
+        );
+      });
+      fetch('/api/monitor/tickers', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(passedSymbols),
+      }).then(() => refreshTickerList()).catch(() => {});
+
+      document.getElementById('ob-meta').textContent =
+        json.updated_at ? 'обновлено ' + json.updated_at : '';
+      document.getElementById('ob-status').style.display = 'none';
+    }
+
+    /* ── рендер таблицы вкладки ─────────────────────────────────── */
+    function obSort(tab, key) {
+      if (obSortKey[tab] === key) obSortAsc[tab] = !obSortAsc[tab];
+      else { obSortKey[tab] = key; obSortAsc[tab] = key === 'symbol'; }
+      renderObTab(tab);
+    }
+
+    function renderObTab(tab) {
+      const rows    = obRows[tab];
+      const tableId = `ob-table-${tab}`;
+      const thresh  = obThresholds[tab];
+
+      if (!rows.length) {
+        document.getElementById(tableId).style.display = 'none';
+        if (tab === obCurrentTab)
+          document.getElementById('ob-count').textContent =
+            Object.values(obRows).some(r => r.length) ? 'Нет монет выше порога' : '';
+        return;
+      }
+
+      const key = obSortKey[tab];
+      const asc = obSortAsc[tab] ? 1 : -1;
+      const sorted = [...rows].sort((a, b) =>
+        key === 'symbol' ? a.symbol.localeCompare(b.symbol) * asc : (a.rsi - b.rsi) * asc
+      );
+
+      if (tab === obCurrentTab)
+        document.getElementById('ob-count').textContent =
+          `${sorted.length} монет (RSI > ${thresh})`;
+
+      document.getElementById(`ob-body-${tab}`).innerHTML = sorted.map(r => {
+        const cls = r.rsi >= thresh + 5 ? 'ob-rsi-high' : 'ob-rsi-mid';
+        return `<tr>
+          <td style="color:#ccc;font-weight:bold">${r.symbol}</td>
+          <td class="rsi-val ${cls}">${r.rsi.toFixed(2)}</td>
+        </tr>`;
+      }).join('');
+
+      document.getElementById(tableId).style.display = 'table';
+    }
+
+    function resetObBtn() {
+      const btn = document.getElementById('ob-scan-btn');
+      btn.disabled = false;
+      btn.classList.remove('scanning');
+      btn.textContent = 'СКАНИРОВАТЬ';
+    }
+
+    // Загружаем пороги из localStorage при старте
+    _loadObThresholds();
+
   </script>
 </body>
 </html>
